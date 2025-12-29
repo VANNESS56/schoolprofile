@@ -33,7 +33,7 @@ export default function News() {
               Berita & <span className="text-blue-600">Acara</span>
             </h2>
             <p className="text-slate-500 text-lg">
-              Ikuti perkembangan terbaru dan keseruan kegiatan di XavoSchool.
+              Ikuti perkembangan terbaru dan keseruan kegiatan di Vanness School.
             </p>
           </div>
           
