@@ -91,7 +91,7 @@ export default function Hero() {
               <motion.img 
                 animate={{ y: [0, -15, 0] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                src="https://www.transparentpng.com/download/student/I4E9X6-student-high-quality-png.png" 
+                src="https://i.ibb.co.com/fVPVMhyZ/image.png" 
                 alt="Student Floating"
                 className="max-h-full w-auto object-contain z-10 drop-shadow-[0_35px_35px_rgba(59,130,246,0.3)]"
               />
