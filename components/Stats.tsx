@@ -1,7 +1,7 @@
 "use client";
 import { motion, useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
-import { Users2, GraduationCap, Trophy, Target } from "lucide-react";
+import { Users2, Trophy, Target, GraduationCap } from "lucide-react";
 
 const stats = [
   { label: "Siswa Aktif", value: 1200, suffix: "+", icon: <Users2 className="w-5 h-5" />, color: "from-blue-600 to-cyan-500" },
@@ -13,15 +13,18 @@ const stats = [
 function Counter({ value, suffix }: { value: number; suffix: string }) {
   const [count, setCount] = useState(0);
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  
+  // PERBAIKAN: Gunakan margin -50px agar animasi jalan lebih awal di HP
+  const isInView = useInView(ref, { once: true, amount: 0.1 });
 
   useEffect(() => {
     if (isInView) {
       let start = 0;
       const end = value;
       const duration = 2000;
-      const increment = end / (duration / 16);
-
+      const totalFrames = 60;
+      const increment = end / totalFrames;
+      
       const timer = setInterval(() => {
         start += increment;
         if (start >= end) {
@@ -30,7 +33,8 @@ function Counter({ value, suffix }: { value: number; suffix: string }) {
         } else {
           setCount(Math.floor(start));
         }
-      }, 16);
+      }, duration / totalFrames);
+      
       return () => clearInterval(timer);
     }
   }, [isInView, value]);
@@ -40,41 +44,27 @@ function Counter({ value, suffix }: { value: number; suffix: string }) {
 
 export default function Stats() {
   return (
-    <section className="relative py-24 bg-white overflow-hidden">
-      {/* Dekorasi Background Halus */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-30">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-100 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-100 rounded-full blur-[120px]" />
-      </div>
-
+    <section className="relative py-20 bg-white overflow-hidden">
       <div className="container mx-auto max-w-6xl px-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Grid disesuaikan: 2 kolom di HP, 4 kolom di Laptop */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
           {stats.map((stat, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1, duration: 0.5 }}
-              className="relative group p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(59,130,246,0.1)] transition-all duration-500"
+              className="relative p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-white border border-slate-100 shadow-sm flex flex-col items-center text-center"
             >
-              {/* Icon Badge */}
-              <div className={`mb-6 w-12 h-12 rounded-2xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform duration-500`}>
+              <div className={`mb-4 w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white`}>
                 {stat.icon}
               </div>
-
-              {/* Number */}
-              <div className={`text-4xl md:text-5xl font-black tracking-tighter bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-2`}>
+              <div className={`text-2xl md:text-4xl font-black bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>
                 <Counter value={stat.value} suffix={stat.suffix} />
               </div>
-
-              {/* Label */}
-              <div className="text-slate-500 font-semibold text-sm tracking-wide uppercase">
+              <div className="text-slate-400 font-bold text-[10px] md:text-xs uppercase tracking-widest">
                 {stat.label}
               </div>
-
-              {/* Dekorasi Garis Hover */}
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-1 bg-gradient-to-r from-blue-600 to-cyan-400 group-hover:w-1/3 transition-all duration-500 rounded-full" />
             </motion.div>
           ))}
         </div>
