@@ -1,6 +1,6 @@
 "use client";
-import { motion, useInView } from "framer-motion";
-import { useRef, useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
 import { Users2, Trophy, Target, GraduationCap } from "lucide-react";
 
 const stats = [
@@ -12,59 +12,70 @@ const stats = [
 
 function Counter({ value, suffix }: { value: number; suffix: string }) {
   const [count, setCount] = useState(0);
-  const ref = useRef(null);
-  
-  // PERBAIKAN: Gunakan margin -50px agar animasi jalan lebih awal di HP
-  const isInView = useInView(ref, { once: true, amount: 0.1 });
+  const [vibe, setVibe] = useState(false);
+  const countRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    if (isInView) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVibe(true);
+        }
+      },
+      { threshold: 0.1 } // Hanya butuh 10% terlihat untuk mulai
+    );
+
+    if (countRef.current) observer.observe(countRef.current);
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (vibe) {
       let start = 0;
       const end = value;
-      const duration = 2000;
-      const totalFrames = 60;
-      const increment = end / totalFrames;
-      
-      const timer = setInterval(() => {
+      const duration = 2000; // 2 detik
+      const increment = end / (duration / 16); // 60fps
+
+      const handle = setInterval(() => {
         start += increment;
         if (start >= end) {
           setCount(end);
-          clearInterval(timer);
+          clearInterval(handle);
         } else {
           setCount(Math.floor(start));
         }
-      }, duration / totalFrames);
-      
-      return () => clearInterval(timer);
-    }
-  }, [isInView, value]);
+      }, 16);
 
-  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
+      return () => clearInterval(handle);
+    }
+  }, [vibe, value]);
+
+  return <span ref={countRef}>{count.toLocaleString()}{suffix}</span>;
 }
 
 export default function Stats() {
   return (
-    <section className="relative py-20 bg-white overflow-hidden">
+    <section className="py-20 bg-white">
       <div className="container mx-auto max-w-6xl px-6">
-        {/* Grid disesuaikan: 2 kolom di HP, 4 kolom di Laptop */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           {stats.map((stat, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="relative p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] bg-white border border-slate-100 shadow-sm flex flex-col items-center text-center"
+              className="p-6 md:p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-sm flex flex-col items-center text-center"
             >
-              <div className={`mb-4 w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white`}>
+              <div className={`mb-4 w-12 h-12 rounded-2xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white shadow-lg`}>
                 {stat.icon}
               </div>
-              <div className={`text-2xl md:text-4xl font-black bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>
+              <div className={`text-3xl md:text-4xl font-black bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
                 <Counter value={stat.value} suffix={stat.suffix} />
               </div>
-              <div className="text-slate-400 font-bold text-[10px] md:text-xs uppercase tracking-widest">
+              <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-2">
                 {stat.label}
-              </div>
+              </p>
             </motion.div>
           ))}
         </div>
